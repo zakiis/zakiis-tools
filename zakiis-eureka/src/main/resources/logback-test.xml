@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] [%logger{36} %L] - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!--定义日志输出的路径 -->
+		<file>logs/app.log</file>
+		<!--定义日志滚动的策略 -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!--定义文件滚动时的文件名的格式 -->
+			<fileNamePattern>logs/app.log.%d{yyyy-MM-dd.HH}</fileNamePattern>
+			<!--30天的时间周期，日志量最大20GB -->
+			<maxHistory>30</maxHistory>
+			<!-- 该属性在 1.1.6版本后 才开始支持 -->
+			<totalSizeCap>20GB</totalSizeCap>
+		</rollingPolicy>
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<!--每个日志文件最大100MB -->
+			<maxFileSize>100MB</maxFileSize>
+		</triggeringPolicy>
+		<!--定义输出格式 -->
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>

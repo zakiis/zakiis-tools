@@ -1,0 +1,67 @@
+{
+  "groups": [
+    {
+      "name": "kettle.database",
+      "type": "com.zakiis.kettle.boot.autoconfigure.KettleDatabaseProperties",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleDatabaseProperties"
+    },
+    {
+      "name": "kettle.repository",
+      "type": "com.zakiis.kettle.boot.autoconfigure.KettleRepositoryProperties",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleRepositoryProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "kettle.database.access-protocol",
+      "type": "java.lang.String",
+      "description": "jdbc",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleDatabaseProperties"
+    },
+    {
+      "name": "kettle.database.host",
+      "type": "java.lang.String",
+      "description": "hostname or ip address",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleDatabaseProperties"
+    },
+    {
+      "name": "kettle.database.name",
+      "type": "java.lang.String",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleDatabaseProperties"
+    },
+    {
+      "name": "kettle.database.password",
+      "type": "java.lang.String",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleDatabaseProperties"
+    },
+    {
+      "name": "kettle.database.port",
+      "type": "java.lang.String",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleDatabaseProperties"
+    },
+    {
+      "name": "kettle.database.type",
+      "type": "java.lang.String",
+      "description": "mysql",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleDatabaseProperties"
+    },
+    {
+      "name": "kettle.database.username",
+      "type": "java.lang.String",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleDatabaseProperties"
+    },
+    {
+      "name": "kettle.repository.password",
+      "type": "java.lang.String",
+      "description": "repository's password, initial value is admin",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleRepositoryProperties"
+    },
+    {
+      "name": "kettle.repository.username",
+      "type": "java.lang.String",
+      "description": "repository's user name, initial value is admin",
+      "sourceType": "com.zakiis.kettle.boot.autoconfigure.KettleRepositoryProperties"
+    }
+  ],
+  "hints": []
+}

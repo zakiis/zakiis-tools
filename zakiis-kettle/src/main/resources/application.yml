@@ -1,0 +1,7 @@
+server:  port: 8080  servlet:    context-path: /    kettle:  database:    type: mysql    access-protocol: jdbc    host: 192.168.137.105    port: 3306    name: kettle    username: root    password: 123456   repository:    username: admin    password: adminlog:  trace-id:    enabled: true    app-name: ${spring.application.name}    header: X-TRACE-ID  desensitization:    replace-fields: userName,mobile    erase-fields: age,password    drop-fields: sexspring:  datasource:    driver-class-name: com.mysql.cj.jdbc.Driver    url: jdbc:mysql://root:123456@192.168.137.105:3306/zakiis    username: root    password: 123456  application:    name: zakiis-kettle
+
+mybatis:
+  cipher:
+    enabled: true
+    secret: 14fc710f878246a74ca7ca246173339b
+    iv: ba7ca246175339b14fc720f873246a7d  mapper-locations:  - classpath*:mapper/*.xml  print-sql: true

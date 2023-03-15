@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="cimb-leave" name="cimb-leave" isExecutable="true">
+    <startEvent id="startevent1" name="Start">
+      <documentation>Apply Leave Process</documentation>
+      <extensionElements>
+        <activiti:formProperty id="um" name="um code" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="leaveStartDate" name="leave start date" type="date" datePattern="yyyy-MM-dd" required="true"></activiti:formProperty>
+        <activiti:formProperty id="leaveDays" name="leave days" type="long" required="true"></activiti:formProperty>
+      </extensionElements>
+    </startEvent>
+    <endEvent id="applySuccess" name="apply success"></endEvent>
+    <userTask id="directSuperiorAudit" name="direct superior audit" activiti:candidateGroups="manager">
+      <documentation>${um} apply for ${leaveDays} days leave, start date ${leaveStartDate}</documentation>
+      <extensionElements>
+        <activiti:formProperty id="auditResult" name="audit result" type="enum" required="true">
+          <activiti:value id="A" name="Approve"></activiti:value>
+          <activiti:value id="R" name="Reject"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="directSuperiorAudit"></sequenceFlow>
+    <endEvent id="applyFail" name="apply fail"></endEvent>
+    <exclusiveGateway id="directAuditResult" name="directAuditResult"></exclusiveGateway>
+    <sequenceFlow id="flow2" sourceRef="directSuperiorAudit" targetRef="directAuditResult"></sequenceFlow>
+    <sequenceFlow id="directAuditPassFlow" name="Approve" sourceRef="directAuditResult" targetRef="applySuccess">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${auditResult == 'A'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="denyFlow" name="Reject" sourceRef="directAuditResult" targetRef="applyFail">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${auditResult == 'R'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="usertask1" name="User Task"></userTask>
+    <sequenceFlow id="flow3" name="Cancel" sourceRef="directAuditResult" targetRef="usertask1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${auditResult == 'C'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_cimb-leave">
+    <bpmndi:BPMNPlane bpmnElement="cimb-leave" id="BPMNPlane_cimb-leave">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="210.0" y="270.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="applySuccess" id="BPMNShape_applySuccess">
+        <omgdc:Bounds height="35.0" width="35.0" x="740.0" y="200.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="directSuperiorAudit" id="BPMNShape_directSuperiorAudit">
+        <omgdc:Bounds height="55.0" width="105.0" x="350.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="applyFail" id="BPMNShape_applyFail">
+        <omgdc:Bounds height="35.0" width="35.0" x="750.0" y="350.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="directAuditResult" id="BPMNShape_directAuditResult">
+        <omgdc:Bounds height="40.0" width="40.0" x="570.0" y="267.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="usertask1" id="BPMNShape_usertask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="760.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="245.0" y="287.0"></omgdi:waypoint>
+        <omgdi:waypoint x="350.0" y="287.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="455.0" y="287.0"></omgdi:waypoint>
+        <omgdi:waypoint x="570.0" y="287.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="directAuditPassFlow" id="BPMNEdge_directAuditPassFlow">
+        <omgdi:waypoint x="590.0" y="267.0"></omgdi:waypoint>
+        <omgdi:waypoint x="590.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="740.0" y="217.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="42.0" x="620.0" y="212.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="denyFlow" id="BPMNEdge_denyFlow">
+        <omgdi:waypoint x="590.0" y="307.0"></omgdi:waypoint>
+        <omgdi:waypoint x="590.0" y="367.0"></omgdi:waypoint>
+        <omgdi:waypoint x="750.0" y="367.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="30.0" x="620.0" y="360.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="610.0" y="287.0"></omgdi:waypoint>
+        <omgdi:waypoint x="760.0" y="287.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="100.0" x="640.0" y="281.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

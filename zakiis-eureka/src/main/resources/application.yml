@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: eureka-server
+
+server:
+  port: ${PORT:8761}
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    appname: ${spring.application.name}
+  client:
+    register-with-eureka: ${BOOL_REGISTER:true}
+    fetch-registry: ${BOOL_FETCH:true}
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://${eureka.instance.hostname}:${server.port}/eureka/}
+    region: defaultZone
+  server:    renewal-percent-threshold: 0.5
+    response-cache-update-interval-ms: 3000
+#    use-read-only-response-cache: false
+#    enable-self-preservation: false

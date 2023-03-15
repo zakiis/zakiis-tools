@@ -1,0 +1,95 @@
+# eureka-statefulset.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-service
+  labels:
+    app: eureka-service
+spec:
+  ports:
+    - port: 8761                                    # service对外提供服务的端口
+      targetPort: 8761
+      nodePort: 8761      #如果不用映射到宿主机端口，则不需要加这个配置 
+      name: eureka-service
+  # clusterIP: None
+  type: NodePort
+  selector:
+    app: eureka-server
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: eureka-server
+spec:
+  serviceName: eureka-service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: eureka-server
+  template:
+    metadata:
+      labels:
+        app: eureka-server
+    spec:
+      containers:
+      - name: eureka-server
+        image: registry.cn-hangzhou.aliyuncs.com/zakiis/eureka:0.0.5
+        ports:
+        - containerPort: 8761
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1.5Gi
+          requests:
+            cpu: 500m
+            memory: 1.5Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8761
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        livenessProbe:
+          tcpSocket: 
+             port: 8761
+          initialDelaySeconds: 120
+          periodSeconds: 3
+          failureThreshold: 3
+          successThreshold: 1
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: APP_TIMEZONE
+          value: GMT+8
+        - name: EUREKA_SERVER
+          value: "http://eureka-server-0.eureka-service:8761/eureka/,http://eureka-server-1.eureka-service:8761/eureka/,http://eureka-server-2.eureka-service:8761/eureka/"
+        - name: EUREKA_INSTANCE_HOSTNAME
+          value: ${POD_NAME}
+        volumeMounts:
+        - mountPath: /wls/deploy/logs
+          name: logs
+          subPathExpr: $(POD_NAME)
+      initContainers: #先在宿主机初始化目录：mkdir -p /data/logs && groupadd -g 1001 -r wls && useradd -r -g 1001 -u 1001 wls81 && chown wls81:wls /data/logs/
+      - name: init-logdir
+        image: registry.cn-hangzhou.aliyuncs.com/zakiis/eureka:0.0.5
+        command: ['sh', '-c', 'mkdir -p /wls/deploy/logs/${POD_NAME}']
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        volumeMounts:
+        - mountPath: /wls/deploy/logs
+          name: logs
+      volumes: 
+      - name: logs
+        hostPath: 
+          path: /data/logs
+          type: Directory
+  podManagementPolicy: "Parallel"

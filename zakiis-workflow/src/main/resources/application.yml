@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://root:123456@192.168.137.105:3306/workflow?serverTimezone=GMT%2b8&useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&allowMultiQueries=true
+    
+  activiti:
+    check-process-definitions: false #don't load process definition automaticly
+    history-level: full
+    db-history-used: true
