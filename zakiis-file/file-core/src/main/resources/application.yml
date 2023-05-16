@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: file-core
+  profiles:    active: "@active@"
+  data:    mongodb:      auto-index-creation: true
+  cloud:
+    loadbalancer:
+      cache:
+        ttl: PT2S
+
+server:  port: 8080
+  servlet:    context-path: /

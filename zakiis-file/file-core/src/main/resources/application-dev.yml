@@ -1,0 +1,23 @@
+spring:
+  data:    mongodb:      uri: mongodb://fileopr:123456@192.168.137.104:27017,192.168.137.105:27017,192.168.137.106:27017/file-dev?authSource=file-dev&replicaSet=rs0
+
+file: 
+  core: 
+    hot-path: target/hot
+    warm-path: target/warm
+    cold-path: target/cold
+    clean-uploading-file-entity-after-seconds: 86400
+    move-into-warm-phase-after-day: 7
+    move-into-cold-phase-after-day: 60
+    
+eureka:
+  instance:
+    appname: ${spring.application.name}    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 5
+    cache-refresh-executor-exponential-back-off-bound: 1
+    region: defaultZone
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

@@ -1,0 +1,43 @@
+{
+  "groups": [
+    {
+      "name": "file.portal",
+      "type": "com.zakiis.file.portal.boot.autoconfigure.properties.FilePortalProperties",
+      "sourceType": "com.zakiis.file.portal.boot.autoconfigure.properties.FilePortalProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "file.portal.aes-secret",
+      "type": "java.lang.String",
+      "description": "AES256 secret key for password encrypt",
+      "sourceType": "com.zakiis.file.portal.boot.autoconfigure.properties.FilePortalProperties"
+    },
+    {
+      "name": "file.portal.file-core-url",
+      "type": "java.lang.String",
+      "description": "file core url",
+      "sourceType": "com.zakiis.file.portal.boot.autoconfigure.properties.FilePortalProperties"
+    },
+    {
+      "name": "file.portal.jwt-secret",
+      "type": "java.lang.String",
+      "description": "HMAC-SHA256 secret key in HEX string for JWT token generate",
+      "sourceType": "com.zakiis.file.portal.boot.autoconfigure.properties.FilePortalProperties"
+    },
+    {
+      "name": "file.portal.session-timeout-mills",
+      "type": "java.lang.Long",
+      "description": "session timeout in milliseconds",
+      "sourceType": "com.zakiis.file.portal.boot.autoconfigure.properties.FilePortalProperties"
+    }
+    ,
+    {
+      "name": "file.portal.skip-auth",
+      "type": "java.lang.Boolean",
+      "description": "for debug purpose need skip authentication",
+      "sourceType": "com.zakiis.file.portal.boot.autoconfigure.properties.FilePortalProperties"
+    }
+  ],
+  "hints": []
+}

@@ -1,0 +1,50 @@
+{
+  "groups": [
+    {
+      "name": "file.core",
+      "type": "com.zakiis.file.core.boot.autoconfigure.properties.FileCoreProperties",
+      "sourceType": "com.zakiis.file.core.boot.autoconfigure.properties.FileCoreProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "file.core.clean-uploading-file-entity-after-seconds",
+      "type": "java.lang.Integer",
+      "description": "file entity in uploading status for a long time may failed in process, should clean these entities in mongodb",
+      "sourceType": "com.zakiis.file.core.boot.autoconfigure.properties.FileCoreProperties"
+    },
+    {
+      "name": "file.core.cold-path",
+      "type": "java.lang.String",
+      "description": "cold path of file saved",
+      "sourceType": "com.zakiis.file.core.boot.autoconfigure.properties.FileCoreProperties"
+    },
+    {
+      "name": "file.core.hot-path",
+      "type": "java.lang.String",
+      "description": "hot path of file saved",
+      "sourceType": "com.zakiis.file.core.boot.autoconfigure.properties.FileCoreProperties"
+    },
+    {
+      "name": "file.core.move-into-cold-phase-after-day",
+      "type": "java.lang.Integer",
+      "description": "how long should file move into cold phase, calculate from create date. a nonpositive value means disable this phase",
+      "sourceType": "com.zakiis.file.core.boot.autoconfigure.properties.FileCoreProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "file.core.move-into-warm-phase-after-day",
+      "type": "java.lang.Integer",
+      "description": "how long should file move into warm phase, calculate from create date. a nonpositive value means disable this phase",
+      "sourceType": "com.zakiis.file.core.boot.autoconfigure.properties.FileCoreProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "file.core.warm-path",
+      "type": "java.lang.String",
+      "description": "warm path of file saved",
+      "sourceType": "com.zakiis.file.core.boot.autoconfigure.properties.FileCoreProperties"
+    }
+  ],
+  "hints": []
+}

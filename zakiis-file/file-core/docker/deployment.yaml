@@ -1,0 +1,208 @@
+# file-core k8s deployment
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-core-service
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8080                                    # service对外提供服务的端口
+    targetPort: 8080
+  type: ClusterIP
+  selector:
+    app: file-core
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: iobs-hot
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: iobs-hot
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 192.168.137.107
+    path: /nfsc/share/iobs/hot
+  mountOptions:
+    - nfsvers=4.2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: iobs-warm
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: iobs-warm
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 192.168.137.107
+    path: /nfsc/share/iobs/warm
+  mountOptions:
+    - nfsvers=4.2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: iobs-cold
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: iobs-cold
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 192.168.137.107
+    path: /nfsc/share/iobs/cold
+  mountOptions:
+    - nfsvers=4.2
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: iobs-hot
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: iobs-hot
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: iobs-warm
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: iobs-warm
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: iobs-cold
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: iobs-cold
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-core
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: file-core
+  template:
+    metadata:
+      labels:
+        app: file-core
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: file-core
+        image: registry.cn-hangzhou.aliyuncs.com/zakiis/file-core:0.0.6
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1.5Gi
+          requests:
+            cpu: 500m
+            memory: 1.5Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          failureThreshold: 5
+          successThreshold: 1
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: APP_TIMEZONE
+          value: GMT+8
+        - name: ACTIVE_PROFILE
+          value: prd
+        - name: EUREKA_SERVER
+          value: "http://eureka-server-0.eureka-service:8761/eureka/,http://eureka-server-1.eureka-service:8761/eureka/,http://eureka-server-2.eureka-service:8761/eureka/"
+        volumeMounts:
+        - name: logs
+          mountPath: /wls/deploy/logs
+          subPathExpr: iobs/$(POD_NAME)
+        - name: iobs-hot
+          mountPath: /wls/deploy/iobs/hot
+        - name: iobs-warm
+          mountPath: /wls/deploy/iobs/warm
+        - name: iobs-cold
+          mountPath: /wls/deploy/iobs/cold
+      initContainers: #先在宿主机初始化目录：mkdir -p /nfsc/logs && groupadd -g 1001 -r wls && useradd -r -g 1001 -u 1001 wls81 && chown wls81:wls /nfsc/logs
+      - name: init-logdir
+        image: registry.cn-hangzhou.aliyuncs.com/zakiis/file-core:0.0.6
+        command: ['sh', '-c', 'mkdir -p /wls/deploy/logs/iobs/${POD_NAME}']
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        volumeMounts:
+        - name: logs
+          mountPath: /wls/deploy/logs
+      volumes: 
+      - name: logs
+        hostPath: 
+          path: /nfsc/logs
+          type: Directory
+      - name: iobs-hot
+        persistentVolumeClaim: 
+          claimName: iobs-hot
+      - name: iobs-warm
+        persistentVolumeClaim: 
+          claimName: iobs-warm
+      - name: iobs-cold
+        persistentVolumeClaim: 
+          claimName: iobs-cold
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata: 
+  name: file-core
+spec: 
+  scaleTargetRef: 
+    apiVersion: apps/v1
+    kind: Deployment
+    name: file-core
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70

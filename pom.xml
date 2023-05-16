@@ -22,6 +22,7 @@
 		<module>zakiis-keycloak-sdk</module>
 		<module>zakiis-mybatis-generator</module>
 		<module>zakiis-workflow</module>
+		<module>zakiis-file</module>
 	</modules>
 
 </project>

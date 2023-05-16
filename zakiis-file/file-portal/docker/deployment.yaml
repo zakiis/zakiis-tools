@@ -1,0 +1,108 @@
+# file-portal k8s deployment
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-portal-service
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8081                                    # service对外提供服务的端口
+    targetPort: 8081
+    nodePort: 8081
+  type: NodePort
+  externalTrafficPolicy: Local #默认是Cluster,集群内任何一个宿主机ip都可以访问，Local模式只能访问pod对应的宿主机ip,可以减少不必要的转发
+  selector:
+    app: file-portal
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-portal
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: file-portal
+  template:
+    metadata:
+      labels:
+        app: file-portal
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: file-portal
+        image: registry.cn-hangzhou.aliyuncs.com/zakiis/file-portal:0.0.6
+        ports:
+        - containerPort: 8081
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1.5Gi
+          requests:
+            cpu: 500m
+            memory: 1.5Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          failureThreshold: 5
+          successThreshold: 1
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: APP_TIMEZONE
+          value: GMT+8
+        - name: ACTIVE_PROFILE
+          value: prd
+        - name: EUREKA_SERVER
+          value: "http://eureka-server-0.eureka-service:8761/eureka/,http://eureka-server-1.eureka-service:8761/eureka/,http://eureka-server-2.eureka-service:8761/eureka/"
+        volumeMounts:
+        - name: logs
+          mountPath: /wls/deploy/logs
+          subPathExpr: iobs/$(POD_NAME)
+      initContainers: #先在宿主机初始化目录：mkdir -p /nfsc/logs && groupadd -g 1001 -r wls && useradd -r -g 1001 -u 1001 wls81 && chown wls81:wls /nfsc/logs
+      - name: init-logdir
+        image: registry.cn-hangzhou.aliyuncs.com/zakiis/file-portal:0.0.6
+        command: ['sh', '-c', 'mkdir -p /wls/deploy/logs/iobs/${POD_NAME}']
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        volumeMounts:
+        - name: logs
+          mountPath: /wls/deploy/logs
+      volumes: 
+      - name: logs
+        hostPath: 
+          path: /nfsc/logs
+          type: Directory
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata: 
+  name: file-portal
+spec: 
+  scaleTargetRef: 
+    apiVersion: apps/v1
+    kind: Deployment
+    name: file-portal
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70

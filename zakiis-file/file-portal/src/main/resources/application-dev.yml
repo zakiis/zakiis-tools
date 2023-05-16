@@ -1,0 +1,28 @@
+spring: 
+  data:    mongodb:      uri: mongodb://fileopr:123456@192.168.137.104:27017,192.168.137.105:27017,192.168.137.106:27017/file-dev?authSource=file-dev&replicaSet=rs0
+  redis:    password: 123456
+    sentinel:      master: mymaster
+      nodes:      - 192.168.137.104:26379
+      - 192.168.137.105:26379
+      - 192.168.137.106:26379
+
+file:
+  portal:
+    file-core-url: http://FILE-CORE
+    session-timeout-mills: 1800000
+    aes-secret: ea1d61dcbb946ec13ec2e8909b87a6cf9bfaadec6d5b002ce16aae5f6891d537
+    jwt-secret: 53301aa0153a8eb7533945fc5eb410e7f3baeecfa117055a30c1a7f30a14e2c2
+    skip-auth: true
+    
+eureka:
+  instance:
+    appname: ${spring.application.name}
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 5
+    cache-refresh-executor-exponential-back-off-bound: 1
+    region: defaultZone
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
