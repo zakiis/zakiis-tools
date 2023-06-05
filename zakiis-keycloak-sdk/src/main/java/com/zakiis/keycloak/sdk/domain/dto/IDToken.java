@@ -25,8 +25,8 @@ public class IDToken {
 	int iat;
 	/** expire at (seconds since Unix epoch*/
 	int exp;
-	/** who or what the token is intended for*/
-	String aud;
+	/** who or what the token is intended for, maybe string or string[] */
+	Object aud;
 	/** subject - whom the token refers to */
 	String sub;
 	/** JWT id (unique identifier for this token) */
@@ -144,11 +144,11 @@ public class IDToken {
 		this.exp = exp;
 	}
 
-	public String getAud() {
+	public Object getAud() {
 		return aud;
 	}
 
-	public void setAud(String aud) {
+	public void setAud(Object aud) {
 		this.aud = aud;
 	}
 

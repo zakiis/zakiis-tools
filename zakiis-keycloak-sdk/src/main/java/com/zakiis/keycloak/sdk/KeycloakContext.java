@@ -45,17 +45,17 @@ public class KeycloakContext {
 	 * Constructor
 	 * @param authURL get end point of keycloak
 	 * @param realm
-	 * @param clientId
+	 * @param client
 	 * @param publicClient if false, need provider secret
 	 * @param clientSecret
 	 */
-	public KeycloakContext(String authURL, String realm, String clientId, boolean publicClient, String clientSecret) {
+	public KeycloakContext(String authURL, String realm, String client, boolean publicClient, String clientSecret) {
 		if (!publicClient) {
 			ValidationUtil.notBlank(clientSecret, "Client secret");
 		}
 		this.authURL = authURL;
 		this.realm = realm;
-		this.clientId = clientId;
+		this.clientId = client;
 		this.clientSecret = clientSecret;
 		this.publicClient = publicClient;
 		init();
@@ -70,7 +70,44 @@ public class KeycloakContext {
 			data = String.format("grant_type=password&client_id=%s&client_secret=%s&username=%s&password=%s", clientId
 					, clientSecret, username, password);	
 		}
-		String body = HttpUtil.post(url, data);
+		String body = HttpUtil.post(url, data, null);
+		Token token = JsonUtil.toObject(body, Token.class);
+		return token;
+	}
+	
+	public Token clientLogin() {
+		String url = umaConfiguration.getTokenEndpoint();
+		String data = null;
+		if (publicClient) {
+			data = String.format("grant_type=client_credentials&client_id=%s", clientId);
+		} else {
+			data = String.format("grant_type=client_credentials&client_id=%s&client_secret=%s", clientId
+					, clientSecret);	
+		}
+		String body = HttpUtil.post(url, data, null);
+		Token token = JsonUtil.toObject(body, Token.class);
+		return token;
+	}
+	
+	/**
+	 * use token to login to another client
+	 * @param token
+	 * @param client the client that you want to login
+	 * @return
+	 */
+	public Token umaLogin(String accessToken, String client) {
+		String url = umaConfiguration.getTokenEndpoint();
+		String data = null;
+		
+		if (publicClient) {
+			data = String.format("grant_type=urn:ietf:params:oauth:grant-type:uma-ticket&client_id=%s&audience=%s", client, client);
+		} else {
+			data = String.format("grant_type=urn:ietf:params:oauth:grant-type:uma-ticket&client_id=%s&audience=%s&client_secret=%s", client
+					, client, clientSecret);	
+		}
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("Authorization", String.format("%s %s", "Bearer", accessToken));
+		String body = HttpUtil.post(url, data, headers);
 		Token token = JsonUtil.toObject(body, Token.class);
 		return token;
 	}
@@ -83,7 +120,7 @@ public class KeycloakContext {
 		} else {
 			params = String.format("client_id=%s&client_secret=%s&refresh_token=%s", clientId, clientSecret, refreshToken);
 		}
-		String data = HttpUtil.post(url, params);
+		String data = HttpUtil.post(url, params, null);
 		System.out.println("logout, data:" + data);
 	}
 	
@@ -114,7 +151,7 @@ public class KeycloakContext {
 			data = String.format("grant_type=refresh_token&client_id=%s&client_secret=%s&refresh_token=%s", clientId
 					, clientSecret, refreshToken);	
 		}
-		String body = HttpUtil.post(url, data);
+		String body = HttpUtil.post(url, data, null);
 		Token token = JsonUtil.toObject(body, Token.class);
 		return token;
 	}
@@ -144,11 +181,11 @@ public class KeycloakContext {
 	private void init() {
 		// init configuration URL
 		String url = authURL + String.format(KeyCloackEndPoints.UMA2_CONFIGURATION, realm);
-		String body = HttpUtil.get(url);
+		String body = HttpUtil.get(url, null);
 		umaConfiguration = JsonUtil.toObject(body, UMA2Configuration.class);
 		// init key
 		url = umaConfiguration.getJwksUri();
-		body = HttpUtil.get(url);
+		body = HttpUtil.get(url, null);
 		List<Map<String, Object>> keyList = ((Map<String, List<Map<String, Object>>>)JsonUtil.toObject(body, Map.class)).get("keys");
 		for (Map<String, Object> keyStrMap : keyList) {
 			if (!"RSA".equals(keyStrMap.get("kty"))) {
